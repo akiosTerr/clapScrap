@@ -1,14 +1,15 @@
 const puppeter = require('puppeteer');
+const links = require('../data/americanas.json').products;
 
-async function launchBot(url, wait = false) {
-	const browser = await puppeter.launch();
+async function launchBot(url) {
+	const browser = await puppeter.launch({
+		headless: true,
+		args: [],
+	});
 	const page = await browser.newPage();
-	await Promise.all([
-		page.goto(url),
-		// page.waitForNavigation({ waitUntil: 'networkidle0' }),
-	]);
+	const response = await page.goto(url);
 
-	return page;
+	return { page, response };
 }
 
 async function getImageURL(page, xpath) {
@@ -32,16 +33,23 @@ async function evalXpath(page, xpath) {
 }
 
 async function main() {
-	const page = await launchBot('https://tim.blog/');
+	const { page, response } = await launchBot(links[0]);
+	const bodyHTML = await page.evaluate(() => document.body.innerHTML);
+	const headers = response.headers();
+
+	console.log(bodyHTML);
+	console.log(headers.status);
+
+	//const response = await getText(page, '.kjGSBk');
 
 	// const url = await getImageURL(page, '//*[@id="post-51490"]/div/figure/img');
 	// console.log(url);
 
-	// const text = await getText(page, '//*[@id="post-51490"]/header/h3/a');
-	// console.log(text);
-
-	const prop = await evalXpath(page, '//*[@id="post-51490"]/div/p[1]/span[3]');
-	console.log(prop);
+	// const prop = await evalXpath(
+	// 	page,
+	// 	'//*[@id="content"]/div/div/div[2]/div/section/div/div/div[2]/div/div[2]/div/div[3]/div[1]/div/div/span'
+	// );
+	// console.log(prop);
 }
 
 main();
