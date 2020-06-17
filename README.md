@@ -17,7 +17,7 @@ const userAgent = 'your user agent string'; //the User Agent String
 const CS = new ClapScrap(userAgent);
 
 //Launch the bot and opens a new page with the URL
-const { page, response } = await CS.launchBot(productURL);
+const { page, response } = await CS.launchBot(URL);
 
 const headers = response.headers();
 
