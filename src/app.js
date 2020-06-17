@@ -1,10 +1,13 @@
 const puppeter = require('puppeteer');
-const links = require('../data/americanas.json').products;
+const data = require('../data/americanas.json');
+const UAstrings = require('../data/UAstrings.json');
+
+const links = data.links;
 
 async function launchBot(url) {
 	const browser = await puppeter.launch({
 		headless: true,
-		args: [],
+		args: [`--user-agent=${UAstrings['Samsung-Galaxy-S7']}`],
 	});
 	const page = await browser.newPage();
 	const response = await page.goto(url);
@@ -16,13 +19,20 @@ async function getImageURL(page, xpath) {
 	const [el] = await page.$x(xpath);
 	const src = await el.getProperty('src');
 	const srcTxt = await src.jsonValue();
-
 	return srcTxt;
 }
 
 async function getText(page, handler) {
 	const text = await page.$eval(handler, (e) => e.innerText);
 	return text;
+}
+
+async function getTexts(handlers, page) {
+	const texts = handlers.map(async (handler) => {
+		const text = await getText(page, handler);
+		return text;
+	});
+	return texts;
 }
 
 async function evalXpath(page, xpath) {
@@ -33,17 +43,22 @@ async function evalXpath(page, xpath) {
 }
 
 async function main() {
-	const { page, response } = await launchBot(links[0]);
-	const bodyHTML = await page.evaluate(() => document.body.innerHTML);
+	const { page, response } = await launchBot(data.products[0]);
 	const headers = response.headers();
-
-	console.log(bodyHTML);
 	console.log(headers.status);
 
-	//const response = await getText(page, '.kjGSBk');
+	const handlers = [data.price, data.title];
+	const texts = await getTexts(handlers, page);
+
+	setTimeout(() => {
+		console.log(texts);
+	}, 100);
 
 	// const url = await getImageURL(page, '//*[@id="post-51490"]/div/figure/img');
 	// console.log(url);
+
+	// const text = await getText(page, '.kjGSBk');
+	// console.log(text);
 
 	// const prop = await evalXpath(
 	// 	page,
