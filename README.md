@@ -25,7 +25,7 @@ const headers = response.headers();
 console.log(headers.status);
 
 //ID or Class of all text elements
-const handlers = ['#yourID', '.yourClass'];
+const handlers = ['#elementID', '.elementClass'];
 
 //Xpath of a image element
 const imageXPATH = '//*[@id="image-element-id"]';
