@@ -17,7 +17,7 @@ const userAgent = 'your user agent string'; //the User Agent String
 const CS = new ClapScrap(userAgent);
 
 //Launch the bot and opens a new page with the URL
-const { page, response } = await CS.launchBot(productURL);
+const { page, response } = await CS.launchBot(URL);
 
 const headers = response.headers();
 
@@ -25,7 +25,7 @@ const headers = response.headers();
 console.log(headers.status);
 
 //ID or Class of all text elements
-const handlers = ['#yourID', '.yourClass'];
+const handlers = ['#elementID', '.elementClass'];
 
 //Xpath of a image element
 const imageXPATH = '//*[@id="image-element-id"]';
