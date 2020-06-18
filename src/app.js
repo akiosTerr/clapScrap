@@ -8,9 +8,9 @@ ClapScrap.prototype = {
 	init: (UA) => {
 		this.UA = UA;
 	},
-	launchBot: async (url) => {
+	launchBot: async (url, headless = true) => {
 		const browser = await puppeter.launch({
-			headless: true,
+			headless: headless,
 			args: [`--user-agent=${this.UA}`],
 		});
 		const page = await browser.newPage();
