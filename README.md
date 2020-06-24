@@ -46,5 +46,5 @@ console.log(imageURL);
 ### Debug 
 disable headless mode for debugging by passing false as second argument to launchBot
 ```javascript
- CS.launchBot("UA", false)
+ CS.launchBot("URL", false)
 ```
