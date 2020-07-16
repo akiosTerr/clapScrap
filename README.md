@@ -48,3 +48,9 @@ disable headless mode for debugging by passing false as second argument to launc
 ```javascript
  CS.launchBot("URL", false)
 ```
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
+
+
+
