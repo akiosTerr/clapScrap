@@ -31,7 +31,15 @@ ClapScrap.prototype = {
 		return property;
 	},
 	getText: async (page, handler) => {
-		const text = await page.$eval(handler, (e) => e.innerText);
+		const text = page
+			.$eval(handler, (e) => e.innerText)
+			.then((data) => {
+				return { status: 1, payload: data };
+			})
+			.catch((err) => {
+				console.log(err);
+				return { status: 0, payload: err };
+			});
 		return text;
 	},
 	getTexts: async (page, handlers) => {
