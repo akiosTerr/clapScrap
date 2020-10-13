@@ -1,22 +1,27 @@
 const puppeter = require('puppeteer');
 
 function ClapScrap(UA) {
-	this.init(UA);
+	this.UA = UA;
 }
 
 ClapScrap.prototype = {
-	init: (UA) => {
-		this.UA = UA;
-	},
 	launchBot: async (url, headless = true) => {
 		const browser = await puppeter.launch({
 			headless: headless,
 			args: [`--user-agent=${this.UA}`],
 		});
+		this.browser = browser;
 		const page = await browser.newPage();
 		const response = await page.goto(url);
 
 		return { page, response };
+	},
+	closeBrowser: async () => {
+		const browser = this.browser;
+		if (browser === undefined) {
+			throw new Error('No browser is currently running');
+		}
+		await browser.close();
 	},
 	getImageURL: async (page, xpath) => {
 		const [el] = await page.$x(xpath);
