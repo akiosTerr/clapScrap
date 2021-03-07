@@ -1,60 +1,89 @@
-const puppeter = require('puppeteer');
+const puppeter = require('puppeteer')
+require('dotenv').config()
 
-function ClapScrap(UA) {
-	this.UA = UA;
+
+function Cl4pScr4p() {
+	this.UA = process.env.UA
+	this.current_page = null
+	this.browser = null
 }
 
-ClapScrap.prototype = {
+Cl4pScr4p.prototype = {
 	launchBot: async (url, headless = true) => {
+		console.log('processing request...');
 		const browser = await puppeter.launch({
 			headless: headless,
-			args: [`--user-agent=${this.UA}`],
-		});
-		this.browser = browser;
-		const page = await browser.newPage();
-		const response = await page.goto(url);
-
-		return { page, response };
+			args: [`--user-agent=${this.UA}`, '--start-maximized'],
+		})
+		this.browser = browser
+		const pages = await browser.pages()
+		this.current_page = pages[0]
+		await this.current_page.setViewport({ width: 1366, height: 768 })
+		const response = await this.current_page.goto(url)
+		return response
 	},
 	closeBrowser: async () => {
-		const browser = this.browser;
-		if (browser === undefined) {
-			throw new Error('No browser is currently running');
+		const browser = this.browser
+		if (browser == null) {
+			throw new Error('No browser is currently running')
 		}
-		await browser.close();
+		await browser.close()
 	},
-	getImageURL: async (page, xpath) => {
-		const [el] = await page.$x(xpath);
-		const src = await el.getProperty('src');
-		const srcTxt = await src.jsonValue();
-		return srcTxt;
+	wait: async (time) => {
+		const page = this.current_page
+		await page.waitForTimeout(time)
 	},
-	evalXpath: async (page, xpath) => {
-		await page.waitForXPath(xpath);
-		const [elHandle] = await page.$x(xpath);
-		const property = await page.evaluate((el) => el.textContent, elHandle);
-		return property;
+	getValueByElement: async (element, selector) => {
+		const page = this.current_page
+		const eh = await element.$(selector)
+		const value = await page.evaluate(x => x.textContent, eh)
+		return value
 	},
-	getText: async (page, handler) => {
-		const text = page
-			.$eval(handler, (e) => e.innerText)
-			.then((data) => {
-				return { status: 1, payload: data };
-			})
-			.catch((err) => {
-				console.log(err);
-				return { status: 0, payload: err };
-			});
-		return text;
+	getValuesFromElements: async (elements, selector) => {
+		const page = this.current_page
+		const values = elements.map(async(eh) => {
+			const elem = await eh.$(selector)
+			const value = await page.evaluate(x => x.textContent, elem)
+			return value
+		})
+		return values
 	},
-	getTexts: async (page, handlers) => {
-		let texts = [];
-		handlers.map(async (handler) => {
-			const text = await page.$eval(handler, (e) => e.innerText);
-			texts.push(text);
-		});
-		return texts;
+	getAttFromElements: async (elements, selector) => {
+		const page = this.current_page
+		const values = elements.map(async(eh) => {
+			const elem = await eh.$(selector)
+			const value = await page.evaluate(x => x.getAttribute('src'), elem)
+			return value
+		})
+		return values
 	},
-};
+	getPropFromElements: async (elements, selector) => {
+		const values = elements.map(async(eh) => {
+			const elem = await eh.$(selector)
+			const value = elem.getProperty('src')
+			return value.jsonValue()
+		})
+		return values
+	},
+	collectByClass: async (className) => {
+		const page = this.current_page
+		const getThemAll = await page.$$(`.${className}`)
+		return getThemAll
+	},
+	pressInput: async (id) => {
+		const page = this.current_page
+		await page.$eval(`#${id}`, elem => elem.click())
+	},
+	getValueById: async (id) => {
+		const page = this.current_page
+		const element = await page.$(`#${id}`)
+		const value = await page.evaluate(x => x.value, element)
+		return value
+	},
+	setInputValue: async (id, newInputValue) => {
+		const page = this.current_page
+		await page.$eval(`input[name=${id}]`, (el, value) => el.value = value, newInputValue)
+	},
+}
 
-module.exports = ClapScrap;
+module.exports = Cl4pScr4p
